@@ -1,6 +1,8 @@
 package com.jackxue.niochat;
 
 
+import com.jackxue.niochat.dto.BaseMessage;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -12,7 +14,6 @@ import java.util.Set;
 
 public class ChatServer extends Thread {
 
-    private List<Rom> romList = new ArrayList<>();
     private ServerSocketChannel serverSocketChannel;
     private Selector selector;
     private String ip;
@@ -21,8 +22,8 @@ public class ChatServer extends Thread {
     private MessageHandler messageHandler;
 
 
-    public ChatServer(String ip, int port){
-        this.ip =  ip;
+    public ChatServer(String ip, int port) {
+        this.ip = ip;
         this.port = port;
     }
 
@@ -39,16 +40,16 @@ public class ChatServer extends Thread {
             //bind 注册监听事件
             doBind(serverSocketChannel, selector);
 
-            while (!isStop){
+            while (!isStop) {
                 selector.select(1000);
                 //获取有事件的 SelectionKey 集合
                 Set<SelectionKey> selectionKeys = selector.selectedKeys();
                 Iterator<SelectionKey> keyIterator = selectionKeys.iterator();
-                while (keyIterator.hasNext()){
+                while (keyIterator.hasNext()) {
                     SelectionKey selectionKey = keyIterator.next();
                     keyIterator.remove();
                     //判断是什么事件发生了
-                    if(selectionKey.isAcceptable()){
+                    if (selectionKey.isAcceptable()) {
                         //accept
                         SocketChannel socketChannel = serverSocketChannel.accept();
                         //配置为非阻塞
@@ -57,17 +58,22 @@ public class ChatServer extends Thread {
                         socketChannel.register(selector, SelectionKey.OP_READ, ByteBuffer.allocate(1024));
                     }
                     //读事件发生
-                    if(selectionKey.isReadable()){
+                    if (selectionKey.isReadable()) {
                         //pipeline
-                        System.out.println("message receive");
-                        messageHandler.handleMessage(new MessageEvent(1, selectionKey));
+                        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+                        ByteBuffer buffer = (ByteBuffer) selectionKey.attachment();
+                        int read = socketChannel.read(buffer);
+                        BaseMessage message = (BaseMessage) SerializeUtil.unSerializeObj(buffer.array());
+                        System.out.println("type:" + message.getType());
+                        messageHandler.handleMessage(new MessageEvent(message.getType(), message), socketChannel);
+                        buffer.clear();
                     }
 
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 serverSocketChannel.close();
             } catch (IOException e) {
@@ -78,7 +84,7 @@ public class ChatServer extends Thread {
     }
 
 
-    public void registerMessageHandler(MessageHandler handler){
+    public void registerMessageHandler(MessageHandler handler) {
         this.messageHandler = handler;
     }
 
