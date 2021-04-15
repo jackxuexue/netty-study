@@ -170,7 +170,7 @@ class TimeClientHandle implements Runnable{
                     //将字节数组转换为String类型
                     String body = new String(bytes);
 //                    System.out.println(body.length());
-                    System.out.println("Now is : " + body + "!");
+                    System.out.println("从服务器接收的消息 : " + body + "!");
                     //this.stop = true;
                 } else if (readBytes < 0) {
                     key.cancel();
@@ -238,4 +238,5 @@ class TimeClientHandle implements Runnable{
     }
 
 }
+
 

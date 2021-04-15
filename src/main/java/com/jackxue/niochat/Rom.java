@@ -52,5 +52,4 @@ public class Rom {
         this.memberList = memberList;
     }
 
-
 }

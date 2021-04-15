@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 public class ChatServer extends Thread {
@@ -64,7 +62,6 @@ public class ChatServer extends Thread {
                         ByteBuffer buffer = (ByteBuffer) selectionKey.attachment();
                         int read = socketChannel.read(buffer);
                         BaseMessage message = (BaseMessage) SerializeUtil.unSerializeObj(buffer.array());
-                        System.out.println("type:" + message.getType());
                         messageHandler.handleMessage(new MessageEvent(message.getType(), message), socketChannel);
                         buffer.clear();
                     }
@@ -95,6 +92,4 @@ public class ChatServer extends Thread {
         //注册accept 事件
         sc.register(selector, SelectionKey.OP_ACCEPT);
     }
-
-
 }

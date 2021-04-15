@@ -1,6 +1,5 @@
 package com.jackxue.niochat;
 
-
 public class MainTest {
     public static void main(String[] args) throws InterruptedException {
         ChatServer chatServer = new ChatServer("localhost", 8080);
